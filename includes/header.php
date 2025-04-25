@@ -75,7 +75,7 @@ require_once $docRoot . '/includes/functions.php';
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="/user/profile.php"><i class="fas fa-user me-1"></i> My Profile</a></li>
-                            <li><a class="dropdown-item" href="/user/posts.php"><i class="fas fa-list me-1"></i> My Listings</a></li>
+                            <li><a class="dropdown-item" href="/user/my_listings.php"><i class="fas fa-list me-1"></i> My Listings</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/auth/logout.php"><i class="fas fa-sign-out-alt me-1"></i> Logout</a></li>
                         </ul>

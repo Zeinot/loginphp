@@ -33,11 +33,27 @@ body {
     opacity: 0.8;
 }
 
-.card {
+.card, .listing-card {
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.listing-img {
+    height: 180px;
+    object-fit: cover;
+    width: 100%;
+    background: #f8f9fa;
+}
+
+.listing-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.listing-card .btn {
+    font-size: 0.95rem;
 }
 
 .card:hover {
