@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 VALUES (?, ?, ?, ?, ?, ?, ?)";
         
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("issdss", $user_id, $title, $description, $price, $location, $contact_email, $contact_phone);
+        $stmt->bind_param("issdsss", $user_id, $title, $description, $price, $location, $contact_email, $contact_phone);
         
         if ($stmt->execute()) {
             $post_id = $conn->insert_id;
@@ -58,25 +58,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Handle image uploads
             $has_primary = false;
             
-            if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
-                for ($i = 0; $i < count($_FILES['images']['name']); $i++) {
-                    if ($_FILES['images']['error'][$i] == 0) {
-                        $file = [
-                            'name' => $_FILES['images']['name'][$i],
-                            'type' => $_FILES['images']['type'][$i],
-                            'tmp_name' => $_FILES['images']['tmp_name'][$i],
-                            'error' => $_FILES['images']['error'][$i],
-                            'size' => $_FILES['images']['size'][$i]
-                        ];
+            error_log("DEBUG: Starting image upload handling for post ID: $post_id");
+            error_log("DEBUG: PHP POST max size: " . ini_get('post_max_size'));
+            error_log("DEBUG: PHP upload max filesize: " . ini_get('upload_max_filesize'));
+            error_log("DEBUG: PHP max file uploads: " . ini_get('max_file_uploads'));
+            
+            // Dump complete $_FILES array
+            error_log("DEBUG: Complete _FILES array: " . json_encode($_FILES));
+            
+            if (isset($_FILES['images'])) {
+                error_log("DEBUG: Found 'images' in _FILES array");
+                
+                if (!empty($_FILES['images']['name'][0])) {
+                    error_log("DEBUG: At least one file was uploaded");
+                    error_log("DEBUG: Number of uploaded files: " . count($_FILES['images']['name']));
+                    
+                    for ($i = 0; $i < count($_FILES['images']['name']); $i++) {
+                        error_log("DEBUG: Processing file $i: {$_FILES['images']['name'][$i]}");
+                        error_log("DEBUG: File $i error code: {$_FILES['images']['error'][$i]}");
                         
-                        // Set first image as primary
-                        $is_primary = (!$has_primary) ? true : false;
-                        
-                        if (uploadImage($file, $post_id, $is_primary)) {
-                            $has_primary = true;
+                        if ($_FILES['images']['error'][$i] == 0) {
+                            error_log("DEBUG: File $i has no upload errors");
+                            
+                            $file = [
+                                'name' => $_FILES['images']['name'][$i],
+                                'type' => $_FILES['images']['type'][$i],
+                                'tmp_name' => $_FILES['images']['tmp_name'][$i],
+                                'error' => $_FILES['images']['error'][$i],
+                                'size' => $_FILES['images']['size'][$i]
+                            ];
+                            
+                            error_log("DEBUG: Prepared file array for uploadImage: " . json_encode($file));
+                            
+                            // Set first image as primary
+                            $is_primary = (!$has_primary) ? true : false;
+                            error_log("DEBUG: Is primary image: " . ($is_primary ? 'yes' : 'no'));
+                            
+                            // Try to upload the image
+                            $upload_result = uploadImage($file, $post_id, $is_primary);
+                            error_log("DEBUG: Upload result for file $i: " . ($upload_result ? "Success with ID: $upload_result" : "Failed"));
+                            
+                            if ($upload_result) {
+                                $has_primary = true;
+                                error_log("DEBUG: Image successfully uploaded and saved to database");
+                            } else {
+                                error_log("DEBUG: Image upload function returned false");
+                            }
+                        } else {
+                            // Log detailed error based on PHP upload error code
+                            $errorMessages = [
+                                1 => "The uploaded file exceeds the upload_max_filesize directive in php.ini",
+                                2 => "The uploaded file exceeds the MAX_FILE_SIZE directive in the HTML form",
+                                3 => "The uploaded file was only partially uploaded",
+                                4 => "No file was uploaded",
+                                6 => "Missing a temporary folder",
+                                7 => "Failed to write file to disk",
+                                8 => "A PHP extension stopped the file upload"
+                            ];
+                            
+                            $errorMessage = isset($errorMessages[$_FILES['images']['error'][$i]]) 
+                                ? $errorMessages[$_FILES['images']['error'][$i]] 
+                                : "Unknown error";
+                                
+                            error_log("DEBUG: File $i upload error: $errorMessage");
                         }
                     }
+                } else {
+                    error_log("DEBUG: Images array exists but is empty (no files selected)");
                 }
+            } else {
+                error_log("DEBUG: No 'images' key found in _FILES array");
+                error_log("DEBUG: Available _FILES keys: " . implode(", ", array_keys($_FILES)));
             }
             
             // Redirect to the new post

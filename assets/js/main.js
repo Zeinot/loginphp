@@ -19,28 +19,83 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewContainer = document.getElementById('image-preview-container');
     
     if (imageInput) {
+        console.log('DEBUG: Image input element found, setting up event listeners');
+        
+        // Log when file input changes
         imageInput.addEventListener('change', function() {
+            console.log('DEBUG: Files selected:', this.files);
             previewContainer.innerHTML = '';
             
-            if (this.files) {
-                Array.from(this.files).forEach(file => {
+            if (this.files && this.files.length > 0) {
+                console.log('DEBUG: Number of files selected:', this.files.length);
+                
+                Array.from(this.files).forEach((file, index) => {
+                    console.log(`DEBUG: File ${index + 1} details:`, {
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        lastModified: new Date(file.lastModified)
+                    });
+                    
                     if (!file.type.match('image.*')) {
+                        console.warn(`DEBUG: File ${file.name} is not an image, skipping`);
                         return;
                     }
                     
                     const reader = new FileReader();
                     
                     reader.onload = function(e) {
+                        console.log(`DEBUG: File ${file.name} loaded successfully`);
                         const img = document.createElement('img');
                         img.classList.add('image-preview');
                         img.src = e.target.result;
                         previewContainer.appendChild(img);
                     }
                     
+                    reader.onerror = function(e) {
+                        console.error(`DEBUG: Error reading file ${file.name}:`, e);
+                    };
+                    
                     reader.readAsDataURL(file);
                 });
+            } else {
+                console.log('DEBUG: No files selected or files array is empty');
             }
         });
+        
+        // Monitor the form submission with files
+        const form = imageInput.closest('form');
+        if (form) {
+            console.log('DEBUG: Found parent form, adding submit event listener');
+            
+            form.addEventListener('submit', function(e) {
+                // Don't prevent the form from submitting, just log information
+                console.log('DEBUG: Form is being submitted');
+                
+                if (imageInput.files && imageInput.files.length > 0) {
+                    console.log('DEBUG: Form submission includes', imageInput.files.length, 'files');
+                    
+                    // Check if FormData is supported and log the data being sent
+                    if (window.FormData) {
+                        const formData = new FormData(form);
+                        console.log('DEBUG: FormData entries:');
+                        for (let pair of formData.entries()) {
+                            if (pair[0] === 'images[]') {
+                                console.log('DEBUG: FormData entry -', pair[0], ':', pair[1].name, '(', pair[1].size, 'bytes )');
+                            } else {
+                                console.log('DEBUG: FormData entry -', pair[0], ':', pair[1]);
+                            }
+                        }
+                    }
+                } else {
+                    console.log('DEBUG: Form is being submitted without any files');
+                }
+            });
+        } else {
+            console.warn('DEBUG: Could not find parent form element');
+        }
+    } else {
+        console.warn('DEBUG: Image input element #post-images not found in the DOM');
     }
     
     // Post gallery thumbnail click handler
