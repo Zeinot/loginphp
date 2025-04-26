@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="520" height="400" viewBox="0 0 520 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background shapes -->
+  <circle cx="260" cy="200" r="180" fill="#F0F4FF" />
+  <circle cx="260" cy="200" r="140" fill="#E4EBFF" />
+  
+  <!-- Building/marketplace illustration -->
+  <rect x="180" y="140" width="160" height="140" rx="8" fill="#FFFFFF" stroke="#4E73DF" stroke-width="3"/>
+  <rect x="180" y="140" width="160" height="30" rx="8" fill="#4E73DF"/>
+  <rect x="200" y="200" width="40" height="80" rx="4" fill="#E4EBFF" stroke="#4E73DF" stroke-width="2"/>
+  <rect x="280" y="200" width="40" height="80" rx="4" fill="#E4EBFF" stroke="#4E73DF" stroke-width="2"/>
+  <rect x="240" y="155" width="40" height="20" rx="4" fill="#FFFFFF" stroke="#4E73DF" stroke-width="2"/>
+  
+  <!-- People silhouettes -->
+  <circle cx="160" cy="220" r="20" fill="#4E73DF"/>
+  <rect x="150" y="240" width="20" height="40" rx="10" fill="#4E73DF"/>
+  <circle cx="360" cy="220" r="20" fill="#1CC88A"/>
+  <rect x="350" y="240" width="20" height="40" rx="10" fill="#1CC88A"/>
+
+  <!-- Transaction arrows -->
+  <path d="M190 210 L155 210" stroke="#4E73DF" stroke-width="3" stroke-linecap="round"/>
+  <path d="M150 208 L160 215" stroke="#4E73DF" stroke-width="3" stroke-linecap="round"/>
+  <path d="M150 212 L160 205" stroke="#4E73DF" stroke-width="3" stroke-linecap="round"/>
+  
+  <path d="M330 210 L365 210" stroke="#1CC88A" stroke-width="3" stroke-linecap="round"/>
+  <path d="M370 208 L360 215" stroke="#1CC88A" stroke-width="3" stroke-linecap="round"/>
+  <path d="M370 212 L360 205" stroke="#1CC88A" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- Icons floating around -->
+  <!-- Shopping icon -->
+  <circle cx="180" cy="100" r="15" fill="#FFF" stroke="#4E73DF" stroke-width="2"/>
+  <path d="M173 100 L187 100" stroke="#4E73DF" stroke-width="2" stroke-linecap="round"/>
+  <path d="M180 93 L180 107" stroke="#4E73DF" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Home icon -->
+  <circle cx="340" cy="100" r="15" fill="#FFF" stroke="#1CC88A" stroke-width="2"/>
+  <path d="M330 105 L340 95 L350 105" stroke="#1CC88A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="335" y="100" width="10" height="10" fill="#FFF" stroke="#1CC88A" stroke-width="2"/>
+  
+  <!-- Car icon -->
+  <circle cx="400" cy="160" r="15" fill="#FFF" stroke="#F6C23E" stroke-width="2"/>
+  <rect x="390" y="160" width="20" height="8" rx="3" fill="#FFF" stroke="#F6C23E" stroke-width="2"/>
+  <circle cx="393" cy="168" r="3" fill="#F6C23E"/>
+  <circle cx="407" cy="168" r="3" fill="#F6C23E"/>
+  
+  <!-- Job icon -->
+  <circle cx="120" cy="160" r="15" fill="#FFF" stroke="#E74A3B" stroke-width="2"/>
+  <rect x="113" y="153" width="14" height="18" rx="2" fill="#FFF" stroke="#E74A3B" stroke-width="2"/>
+  <path d="M113 160 L127 160" stroke="#E74A3B" stroke-width="2"/>
+  
+  <!-- Floating messages -->
+  <rect x="190" y="60" width="80" height="25" rx="12.5" fill="#E4EBFF" stroke="#4E73DF" stroke-width="2"/>
+  <circle cx="210" cy="72" r="4" fill="#4E73DF"/>
+  <circle cx="225" cy="72" r="4" fill="#4E73DF"/>
+  <circle cx="240" cy="72" r="4" fill="#4E73DF"/>
+  
+  <rect x="250" y="300" width="80" height="25" rx="12.5" fill="#E4EBFF" stroke="#4E73DF" stroke-width="2"/>
+  <rect x="265" y="308" width="50" height="8" rx="4" fill="#4E73DF"/>
+  
+  <!-- ListItAll text -->
+  <path d="M260 90 L265 90" stroke="#4E73DF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M255 90 L255 105" stroke="#4E73DF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M255 105 L265 105" stroke="#4E73DF" stroke-width="4" stroke-linecap="round"/>
+  
+  <circle cx="275" cy="90" r="3" fill="#4E73DF"/>
+  
+  <path d="M285 90 L285 105" stroke="#4E73DF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M285 90 L295 90" stroke="#4E73DF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M285 97 L293 97" stroke="#4E73DF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M285 105 L295 105" stroke="#4E73DF" stroke-width="4" stroke-linecap="round"/>
+</svg>

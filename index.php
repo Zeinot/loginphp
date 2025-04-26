@@ -35,18 +35,41 @@ if ($categoryName) {
 
 <?php include 'includes/header.php'; ?>
 
-<!-- Hero Section -->
-<section class="hero mb-5">
-    <div class="container text-center hero-content">
-        <h1 class="display-4 fw-bold">Find Everything You Need Locally</h1>
-        <p class="lead mb-4">Buy and sell items, find jobs, housing, and services in your local community.</p>
-        <div class="d-flex justify-content-center">
-            <a href="/posts/create.php" class="btn btn-success btn-lg me-3">
-                <i class="fas fa-plus-circle me-2"></i> Post an Ad
-            </a>
-            <a href="/how-it-works.php" class="btn btn-outline-light btn-lg">
-                <i class="fas fa-info-circle me-2"></i> How It Works
-            </a>
+<!-- Hero Section - Enhanced with better visuals and stronger value proposition -->
+<section class="hero mb-5 py-5" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%); color: white; border-radius: 0 0 15px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-7 text-center text-lg-start">
+                <h1 class="display-3 fw-bold mb-3">Find Everything You Need Locally</h1>
+                <p class="lead fs-4 mb-4 opacity-90">The modern marketplace to buy, sell, and connect with your community. Post listings for free and find everything you need nearby.</p>
+                <div class="d-flex flex-column flex-sm-row gap-3">
+                    <a href="/posts/create.php" class="btn btn-light btn-lg fw-bold" style="padding: 12px 24px;">
+                        <i class="fas fa-plus-circle me-2"></i> Post an Ad
+                    </a>
+                    <a href="/how-it-works.php" class="btn btn-outline-light btn-lg" style="padding: 12px 24px;">
+                        <i class="fas fa-info-circle me-2"></i> How It Works
+                    </a>
+                </div>
+                <div class="mt-4">
+                    <div class="d-flex justify-content-center justify-content-lg-start gap-4">
+                        <div>
+                            <div class="text-warning fs-5"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                            <p class="mb-0 small">4.8/5 Rating</p>
+                        </div>
+                        <div>
+                            <div class="text-white fs-5"><i class="fas fa-users"></i> 10,000+</div>
+                            <p class="mb-0 small">Active Users</p>
+                        </div>
+                        <div>
+                            <div class="text-white fs-5"><i class="fas fa-check-circle"></i> 100%</div>
+                            <p class="mb-0 small">Secure</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <img src="/assets/images/hero-illustration.svg" alt="ListItAll Marketplace" class="img-fluid mt-4 mt-lg-0" style="max-height: 400px;">
+            </div>
         </div>
     </div>
 </section>
@@ -244,47 +267,134 @@ if ($categoryName) {
     </div>
 </section>
 
-<!-- How It Works Section -->
-<section class="py-5 bg-light rounded-3">
+<!-- How It Works Section - Improved design and flow -->
+<section class="how-it-works py-5 my-5">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="fw-bold">How It Works</h2>
-            <p class="lead">Follow these simple steps to buy or sell on ListItAll</p>
+            <span class="badge bg-primary px-3 py-2 mb-2">SIMPLE PROCESS</span>
+            <h2 class="display-5 fw-bold">How It Works</h2>
+            <p class="lead col-md-8 mx-auto">Getting started on ListItAll is quick and easy. Follow these three simple steps to buy or sell items in your local community.</p>
         </div>
-        <div class="row g-4">
+        
+        <div class="row g-4 mb-5">
             <div class="col-md-4">
-                <div class="card border-0 h-100 shadow-sm">
+                <div class="card border-0 h-100 shadow-sm hover-lift transition-300">
                     <div class="card-body text-center p-4">
-                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                        <div class="process-icon rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 90px; height: 90px; border: 5px solid rgba(78,115,223,0.2);">
                             <i class="fas fa-user-plus fa-2x"></i>
                         </div>
-                        <h5 class="card-title">1. Create an Account</h5>
-                        <p class="card-text">Sign up for a free account to start posting listings or contacting sellers.</p>
-                        <a href="/auth/register.php" class="btn btn-outline-primary mt-2">Register Now</a>
+                        <h5 class="card-title fw-bold fs-4">1. Create an Account</h5>
+                        <p class="card-text text-muted">Sign up for a free account in less than 60 seconds to start posting listings or contacting sellers.</p>
+                        <a href="/auth/register.php" class="btn btn-outline-primary mt-3 fw-semibold px-4">
+                            <i class="fas fa-arrow-right me-2"></i> Register Now
+                        </a>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card border-0 h-100 shadow-sm">
+                <div class="card border-0 h-100 shadow-sm hover-lift transition-300">
                     <div class="card-body text-center p-4">
-                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                        <div class="process-icon rounded-circle bg-success text-white d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 90px; height: 90px; border: 5px solid rgba(28,200,138,0.2);">
                             <i class="fas fa-edit fa-2x"></i>
                         </div>
-                        <h5 class="card-title">2. Post or Browse</h5>
-                        <p class="card-text">Create a listing with details and photos or browse existing listings to find what you need.</p>
-                        <a href="/posts/create.php" class="btn btn-outline-success mt-2">Post an Ad</a>
+                        <h5 class="card-title fw-bold fs-4">2. Post or Browse</h5>
+                        <p class="card-text text-muted">Create a listing with details and photos or browse existing listings in your area to find exactly what you need.</p>
+                        <a href="/posts/create.php" class="btn btn-outline-success mt-3 fw-semibold px-4">
+                            <i class="fas fa-plus me-2"></i> Post an Ad
+                        </a>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card border-0 h-100 shadow-sm">
+                <div class="card border-0 h-100 shadow-sm hover-lift transition-300">
                     <div class="card-body text-center p-4">
-                        <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px;">
+                        <div class="process-icon rounded-circle bg-info text-white d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 90px; height: 90px; border: 5px solid rgba(54,185,204,0.2);">
                             <i class="fas fa-comments fa-2x"></i>
                         </div>
-                        <h5 class="card-title">3. Connect & Complete</h5>
-                        <p class="card-text">Contact sellers, negotiate deals, and complete transactions safely and easily.</p>
-                        <a href="/safety-tips.php" class="btn btn-outline-info mt-2">Safety Tips</a>
+                        <h5 class="card-title fw-bold fs-4">3. Connect & Complete</h5>
+                        <p class="card-text text-muted">Contact sellers, negotiate deals, and complete transactions safely and easily through our secure platform.</p>
+                        <a href="/safety-tips.php" class="btn btn-outline-info mt-3 fw-semibold px-4">
+                            <i class="fas fa-shield-alt me-2"></i> Safety Tips
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Testimonials Section -->
+        <div class="testimonials bg-light p-4 p-md-5 rounded-4 mt-5">
+            <div class="text-center mb-4">
+                <h3 class="fw-bold">What Our Users Say</h3>
+                <p class="text-muted">Join thousands of satisfied ListItAll users</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card border-0 h-100 bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex mb-3">
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <p class="fst-italic mb-3">"I sold my bicycle within 24 hours of posting it on ListItAll. The process was so easy and the buyer lived just a few blocks away!"</p>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">MB</div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">Michael B.</h6>
+                                    <small class="text-muted">San Francisco, CA</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 h-100 bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex mb-3">
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <p class="fst-italic mb-3">"Found the perfect apartment in my neighborhood through ListItAll. The interface made it so easy to filter for exactly what I needed."</p>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">SJ</div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">Sarah J.</h6>
+                                    <small class="text-muted">Chicago, IL</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-0 h-100 bg-white">
+                        <div class="card-body p-4">
+                            <div class="d-flex mb-3">
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                            </div>
+                            <p class="fst-italic mb-3">"I've been using ListItAll for over a year now to find clients for my handyman services. It's been a game-changer for my business!"</p>
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">RT</div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">Robert T.</h6>
+                                    <small class="text-muted">Austin, TX</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
