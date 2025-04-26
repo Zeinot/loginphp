@@ -39,8 +39,8 @@ require_once $docRoot . '/includes/functions.php';
                         </a>
                         <ul class="dropdown-menu">
                             <?php
-                            $categories = getCategories();
-                            foreach ($categories as $category) {
+                            $nav_categories = getCategories();
+                            foreach ($nav_categories as $category) {
                                 echo '<li><a class="dropdown-item" href="/index.php?category=' . $category['id'] . '">' . $category['name'] . '</a></li>';
                             }
                             ?>

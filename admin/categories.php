@@ -123,6 +123,7 @@ if ($action === 'edit' && $category_id > 0) {
 }
 
 // Build query for categories
+// Initialize query components
 $where_clause = '';
 $params = [];
 $types = '';
@@ -133,7 +134,6 @@ if (!empty($searchTerm)) {
     $searchParam = "%$searchTerm%";
     $params = [$searchParam, $searchParam, $searchParam];
     $types = 'sss';
-    
 }
 
 // Count total categories for pagination
@@ -157,19 +157,24 @@ $total_pages = ceil($total_categories / $limit);
 $categories_with_counts = [];
 $category_ids = [];
 
-// Special handling for searches with no results
-if (!empty($searchTerm) && $total_categories == 0) {
-    // Initialize empty arrays for categories and counts
-    $categories = [];
-    $category_counts = [];
-    $category_ids = [];
-    
-    
-    // Add a notice about the search results
-    $success = "Search completed successfully.";
-    $error = "No categories found matching '$searchTerm'.";
-    
-    goto output_stage; // Skip to the output stage to avoid unnecessary queries
+// Special handling for searches with no results or search queries
+if (!empty($searchTerm)) {
+    // If search found no results
+    if ($total_categories == 0) {
+        // Initialize empty arrays for categories and counts
+        $categories = [];
+        $category_counts = [];
+        $category_ids = [];
+        
+        // Add a notice about the search results
+        $success = "Search completed successfully.";
+        $error = "No categories found matching '$searchTerm'.";
+        
+        goto output_stage; // Skip to the output stage to avoid unnecessary queries
+    } else {
+        // When searching with results, add a success message
+        $success = "Search completed successfully.";
+    }
 }
 
 // Get categories first
@@ -203,16 +208,37 @@ if (!empty($query_params)) {
     $stmt->bind_param($query_types, ...$query_params);
 }
 
-
 $stmt->execute();
 $result = $stmt->get_result();
 
+// Debug SQL results
+echo '<div style="background-color: #cce5ff; padding: 10px; margin: 10px 0; border-radius: 5px; color: #004085; border: 1px solid #b8daff;">';
+echo '<strong>DEBUG - Result Info</strong><br>';
+echo 'Num Rows: ' . $result->num_rows . '<br>';
+echo '</div>';
+
+// Add debug before the loop
+echo '<div style="background-color: #e2e3e5; padding: 10px; margin: 10px 0; border-radius: 5px; color: #383d41; border: 1px solid #d6d8db;">';
+echo '<strong>DEBUG - Before Fetch Loop</strong><br>';
+echo 'Category count: ' . (isset($categories) ? count($categories) : 'Not Set') . '<br>';
+echo '</div>';
+
 // Store all categories and their IDs
-$categories = [];
+$categories = []; // Reset the array
 while ($row = $result->fetch_assoc()) {
     $categories[] = $row;
     $category_ids[] = $row['id'];
+    // Add debug inside the loop
+    echo '<div style="background-color: #e2e3e5; padding: 5px; margin: 5px 0; border-radius: 3px; color: #383d41; border: 1px solid #d6d8db;">';
+    echo 'DEBUG - Inside Fetch Loop: Added category ID = ' . $row['id'];
+    echo '</div>';
 }
+
+// Add debug after the loop
+echo '<div style="background-color: #e2e3e5; padding: 10px; margin: 10px 0; border-radius: 5px; color: #383d41; border: 1px solid #d6d8db;">';
+echo '<strong>DEBUG - After Fetch Loop</strong><br>';
+echo 'Category count: ' . count($categories) . '<br>';
+echo '</div>';
 
 
 
@@ -222,10 +248,10 @@ if (!empty($searchTerm)) {
     if ($total_categories == 0) {
         $showing_text = "Found 0 categories matching '$searchTerm'";
     } else {
-        $showing_text = "Showing $total_categories result(s) for search query '$searchTerm'";
+        $showing_text = "Showing " . count($categories) . " of $total_categories result(s) for search query '$searchTerm'";
     }
 } else {
-    $showing_text = "Showing $total_categories out of $total_categories categories";
+    $showing_text = "Showing " . count($categories) . " of $total_categories categories";
 }
 
 if (!empty($category_ids)) {
@@ -385,11 +411,21 @@ include '../includes/header.php';
                                     <?php 
                                     // Check if this is a search with no results
                                     $is_empty_search = (!empty($searchTerm) && $total_categories == 0);
+
+                                    // Debug rendered categories
+                                    echo '<div style="background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; color: #856404; border: 1px solid #ffeeba;">';
+                                    echo '<strong>DEBUG - Categories</strong><br>';
+                                    echo 'Total Categories: ' . $total_categories . '<br>';
+                                    echo 'Categories Array Count: ' . count($categories) . '<br>';
+                                    echo 'Is Search: ' . (!empty($searchTerm) ? 'YES' : 'NO') . '<br>';
+                                    echo 'Search Term: ' . htmlspecialchars($searchTerm) . '<br>';
+                                    echo 'Categories IDs: ' . htmlspecialchars(implode(', ', array_column($categories, 'id'))) . '<br>';
+                                    echo '</div>';
                                     
-                                    // Only show categories if either:
-                                    // 1. We're not searching, or
-                                    // 2. We're searching and found results
-                                    if ($is_empty_search || empty($categories)): 
+                                    // Show no results message if:
+                                    // 1. Search found no results, or
+                                    // 2. There are no categories at all
+                                    if (empty($categories)): 
                                     ?>
                                         <tr>
                                             <td colspan="6" class="text-center py-4">
@@ -602,7 +638,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/\s+/g, '-')           // Replace spaces with -
             .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
             .replace(/\-\-+/g, '-')         // Replace multiple - with single -
-            .replace(/^-+/, '')             // Trim - from start of text
+            .replace(/^[-]+/, '')            // Trim - from start of text
             .replace(/-+$/, '');            // Trim - from end of text
     }
     
