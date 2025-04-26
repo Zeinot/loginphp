@@ -147,12 +147,6 @@ $result_count = $stmt_count->get_result();
 $total_categories = $result_count->fetch_assoc()['total'];
 $total_pages = ceil($total_categories / $limit);
 
-
-
-
-
-
-
 // First get all category IDs for later use
 $categories_with_counts = [];
 $category_ids = [];
@@ -199,9 +193,6 @@ foreach ($pagination_params as $param) {
 }
 $query_types .= $pagination_types;
 
-
-
-
 $stmt = $conn->prepare($sql);
 if (!empty($query_params)) {
     // Bind all parameters including pagination
@@ -211,37 +202,12 @@ if (!empty($query_params)) {
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Debug SQL results
-echo '<div style="background-color: #cce5ff; padding: 10px; margin: 10px 0; border-radius: 5px; color: #004085; border: 1px solid #b8daff;">';
-echo '<strong>DEBUG - Result Info</strong><br>';
-echo 'Num Rows: ' . $result->num_rows . '<br>';
-echo '</div>';
-
-// Add debug before the loop
-echo '<div style="background-color: #e2e3e5; padding: 10px; margin: 10px 0; border-radius: 5px; color: #383d41; border: 1px solid #d6d8db;">';
-echo '<strong>DEBUG - Before Fetch Loop</strong><br>';
-echo 'Category count: ' . (isset($categories) ? count($categories) : 'Not Set') . '<br>';
-echo '</div>';
-
 // Store all categories and their IDs
 $categories = []; // Reset the array
 while ($row = $result->fetch_assoc()) {
     $categories[] = $row;
     $category_ids[] = $row['id'];
-    // Add debug inside the loop
-    echo '<div style="background-color: #e2e3e5; padding: 5px; margin: 5px 0; border-radius: 3px; color: #383d41; border: 1px solid #d6d8db;">';
-    echo 'DEBUG - Inside Fetch Loop: Added category ID = ' . $row['id'];
-    echo '</div>';
 }
-
-// Add debug after the loop
-echo '<div style="background-color: #e2e3e5; padding: 10px; margin: 10px 0; border-radius: 5px; color: #383d41; border: 1px solid #d6d8db;">';
-echo '<strong>DEBUG - After Fetch Loop</strong><br>';
-echo 'Category count: ' . count($categories) . '<br>';
-echo '</div>';
-
-
-
 
 // Get all post counts at once if we have categories
 if (!empty($searchTerm)) {
@@ -314,12 +280,9 @@ if (empty($showing_text)) {
     }
 }
 
-
-
 // Set page title
 $page_title = 'Manage Categories';
 include '../includes/header.php';
-
 
 ?>
 
@@ -386,8 +349,6 @@ include '../includes/header.php';
                                 Searching for: <strong><?php echo htmlspecialchars($searchTerm); ?></strong>
                                 <a href="/admin/categories.php" class="float-end">Clear Search</a>
                             </div>
-                            
-
                         <?php endif; ?>
                     </div>
                 </div>
@@ -412,19 +373,6 @@ include '../includes/header.php';
                                     // Check if this is a search with no results
                                     $is_empty_search = (!empty($searchTerm) && $total_categories == 0);
 
-                                    // Debug rendered categories
-                                    echo '<div style="background-color: #fff3cd; padding: 10px; margin: 10px 0; border-radius: 5px; color: #856404; border: 1px solid #ffeeba;">';
-                                    echo '<strong>DEBUG - Categories</strong><br>';
-                                    echo 'Total Categories: ' . $total_categories . '<br>';
-                                    echo 'Categories Array Count: ' . count($categories) . '<br>';
-                                    echo 'Is Search: ' . (!empty($searchTerm) ? 'YES' : 'NO') . '<br>';
-                                    echo 'Search Term: ' . htmlspecialchars($searchTerm) . '<br>';
-                                    echo 'Categories IDs: ' . htmlspecialchars(implode(', ', array_column($categories, 'id'))) . '<br>';
-                                    echo '</div>';
-                                    
-                                    // Show no results message if:
-                                    // 1. Search found no results, or
-                                    // 2. There are no categories at all
                                     if (empty($categories)): 
                                     ?>
                                         <tr>
@@ -546,8 +494,6 @@ include '../includes/header.php';
                         </div>
                     </div>
                 </div>
-                
-
             </div>
         </div>
     </div>
