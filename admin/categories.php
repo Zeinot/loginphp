@@ -142,9 +142,23 @@ $result_count = $stmt_count->get_result();
 $total_categories = $result_count->fetch_assoc()['total'];
 $total_pages = ceil($total_categories / $limit);
 
-// Get categories
-$sql = "SELECT c.*, 
-              (SELECT COUNT(*) FROM post_categories WHERE category_id = c.id) as post_count 
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Debug function
+function debug_log($message, $data = null) {
+    error_log(print_r(['message' => $message, 'data' => $data], true));
+}
+
+debug_log('Starting category processing');
+
+// First get all category IDs for later use
+$categories_with_counts = [];
+$category_ids = [];
+
+// Get categories first
+$sql = "SELECT c.* 
         FROM categories c 
         $where_clause 
         ORDER BY c.name ASC 
@@ -153,20 +167,133 @@ $params[] = $offset;
 $params[] = $limit;
 $types .= 'ii';
 
+debug_log('Category SQL', $sql);
+debug_log('Category Params', $params);
+
 $stmt = $conn->prepare($sql);
 if (!empty($params)) {
     $stmt->bind_param($types, ...$params);
 }
 $stmt->execute();
 $result = $stmt->get_result();
+
+// Store all categories and their IDs
 $categories = [];
 while ($row = $result->fetch_assoc()) {
     $categories[] = $row;
+    $category_ids[] = $row['id'];
 }
+
+debug_log('Categories fetched', $categories);
+debug_log('Category IDs', $category_ids);
+
+// Get all post counts at once if we have categories
+if (!empty($category_ids)) {
+    // First, verify post_categories table exists and has data
+    $check_table = "SHOW TABLES LIKE 'post_categories'";
+    $table_result = $conn->query($check_table);
+    debug_log('Table check result', ['exists' => ($table_result->num_rows > 0)]);
+    
+    if ($table_result->num_rows > 0) {
+        // Check for any entries in post_categories
+        $check_entries = "SELECT COUNT(*) as total FROM post_categories";
+        $entries_result = $conn->query($check_entries);
+        $entries_count = $entries_result->fetch_assoc()['total'];
+        debug_log('Total post_categories entries', $entries_count);
+        
+        // Direct query for debugging each category
+        foreach ($category_ids as $cat_id) {
+            $debug_query = "SELECT COUNT(*) as count FROM post_categories WHERE category_id = $cat_id";
+            $debug_result = $conn->query($debug_query);
+            $debug_count = $debug_result->fetch_assoc()['count'];
+            debug_log("Category ID $cat_id has $debug_count posts");
+        }
+        
+        // Get counts for all categories directly with a single query
+        $counts_query = "SELECT category_id, COUNT(*) as post_count 
+                        FROM post_categories 
+                        WHERE category_id IN (" . implode(',', $category_ids) . ") 
+                        GROUP BY category_id";
+        
+        debug_log('Counts query', $counts_query);
+        
+        $counts_result = $conn->query($counts_query);
+        debug_log('Counts result', ['success' => ($counts_result !== false), 'rows' => ($counts_result ? $counts_result->num_rows : 0)]);
+        
+        $category_counts = [];
+        
+        // Create a lookup array of counts by category ID
+        if ($counts_result && $counts_result->num_rows > 0) {
+            while ($count = $counts_result->fetch_assoc()) {
+                $category_counts[$count['category_id']] = (int)$count['post_count'];
+            }
+        }
+        
+        debug_log('Category counts array', $category_counts);
+        
+        // Merge the counts with the categories
+        foreach ($categories as &$category) {
+            $category['post_count'] = isset($category_counts[$category['id']]) ? $category_counts[$category['id']] : 0;
+            debug_log("Setting post_count for category {$category['name']} (ID: {$category['id']}) to {$category['post_count']}");
+        }
+    } else {
+        debug_log('ERROR: post_categories table does not exist');
+    }
+} else {
+    debug_log('No category IDs to process');
+}
+
+debug_log('Final categories with counts', $categories);
+
+// Add a debug variable for JavaScript
+$debug_data = [
+    'category_ids' => $category_ids,
+    'category_counts' => $category_counts ?? [],
+    'categories' => $categories
+];
+
+
 
 // Set page title
 $page_title = 'Manage Categories';
 include '../includes/header.php';
+
+// Debug Information (Hidden)
+echo '<div id="php-debug-data" style="display: none;" data-debug="' . htmlspecialchars(json_encode($debug_data)) . '"></div>';
+
+echo '<script>
+// Client-side debugging
+const debugData = JSON.parse(document.getElementById("php-debug-data").dataset.debug);
+console.log("Debug data from PHP:", debugData);
+
+// Add debugging to post count display when page loads
+document.addEventListener("DOMContentLoaded", function() {
+    const postCountCells = document.querySelectorAll(".post-count-cell");
+    console.log("Found " + postCountCells.length + " post count cells");
+    
+    // Check each cell for correct data
+    postCountCells.forEach(cell => {
+        const categoryId = cell.dataset.categoryId;
+        const displayedCount = cell.textContent.trim();
+        const expectedCount = debugData.category_counts[categoryId] || 0;
+        
+        console.log(`Category ID ${categoryId}: Displayed=${displayedCount}, Expected=${expectedCount}`);
+        
+        // Highlight cells with incorrect counts for visibility
+        if (displayedCount != expectedCount) {
+            cell.style.backgroundColor = "#ffcccc";
+            cell.title = `Expected: ${expectedCount}`;
+            console.error(`Mismatch for category ID ${categoryId}: Displayed=${displayedCount}, Expected=${expectedCount}`);
+        }
+        
+        // Highlight non-zero counts with green background
+        if (displayedCount > 0) {
+            cell.style.backgroundColor = "#ccffcc";
+            cell.style.fontWeight = "bold";
+        }
+    });
+});
+</script>';
 ?>
 
 <div class="container-fluid py-4">
@@ -265,14 +392,23 @@ include '../includes/header.php';
                                                     </div>
                                                 </td>
                                                 <td><code><?php echo htmlspecialchars($category['slug']); ?></code></td>
-                                                <td><?php echo isset($category['post_count']) ? $category['post_count'] : 0; ?></td>
+                                                <td class="post-count-cell" data-category-id="<?php echo $category['id']; ?>">
+                                                    <?php 
+                                                    // Output the raw post count directly
+                                                    if (isset($category_counts[$category['id']])) {
+                                                        echo $category_counts[$category['id']];
+                                                    } else {
+                                                        echo '0';
+                                                    }
+                                                    ?>
+                                                </td>
                                                 <td><?php echo formatDate($category['created_at']); ?></td>
                                                 <td>
                                                     <div class="btn-group float-end">
                                                         <a href="/admin/categories.php?action=edit&id=<?php echo $category['id']; ?>" class="btn btn-sm btn-outline-primary">
                                                             <i class="fas fa-edit"></i> Edit
                                                         </a>
-                                                        <?php if (!isset($category['post_count']) || $category['post_count'] == 0): ?>
+                                                        <?php if (!isset($category_counts[$category['id']]) || $category_counts[$category['id']] == 0): ?>
                                                             <a href="/admin/categories.php?action=delete&id=<?php echo $category['id']; ?>" 
                                                                class="btn btn-sm btn-outline-danger" 
                                                                onclick="return confirm('Are you sure you want to delete this category?');">
