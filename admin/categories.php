@@ -8,6 +8,11 @@ if (!isLoggedIn() || !isAdmin()) {
 
 // Initialize variables
 $searchTerm = isset($_GET['search']) ? sanitize($_GET['search']) : '';
+$showing_text = ''; // Initialize showing_text to prevent undefined variable warnings
+
+// Initialize debug data array
+$debug_data = []; 
+debug_log('Search request parameters', $_GET);
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $limit = 10; // Items per page
 $offset = ($page - 1) * $limit;
@@ -124,11 +129,15 @@ $where_clause = '';
 $params = [];
 $types = '';
 
+// Add search query if search term is provided
 if (!empty($searchTerm)) {
-    $where_clause = "WHERE name LIKE ? OR description LIKE ? OR slug LIKE ?";
+    $where_clause = "WHERE (name LIKE ? OR description LIKE ? OR slug LIKE ?)";
     $searchParam = "%$searchTerm%";
     $params = [$searchParam, $searchParam, $searchParam];
     $types = 'sss';
+    
+    // Log search query for debugging
+    debug_log('Search activated', ['term' => $searchTerm, 'param' => $searchParam]);
 }
 
 // Count total categories for pagination
@@ -149,6 +158,17 @@ ini_set('display_errors', 1);
 // Debug function
 function debug_log($message, $data = null) {
     error_log(print_r(['message' => $message, 'data' => $data], true));
+    
+    global $debug_data;
+    if (!isset($debug_data)) {
+        $debug_data = [];
+    }
+    
+    $debug_data[] = [
+        'message' => $message,
+        'data' => $data,
+        'time' => date('H:i:s')
+    ];
 }
 
 debug_log('Starting category processing');
@@ -157,23 +177,63 @@ debug_log('Starting category processing');
 $categories_with_counts = [];
 $category_ids = [];
 
+// Special handling for searches with no results
+if (!empty($searchTerm) && $total_categories == 0) {
+    // Initialize empty arrays for categories and counts
+    $categories = [];
+    $category_counts = [];
+    $category_ids = [];
+    debug_log('Search found no results, skipping further queries');
+    
+    // Add a notice about the search results
+    $success = "Search completed successfully.";
+    $error = "No categories found matching '$searchTerm'.";
+    
+    goto output_stage; // Skip to the output stage to avoid unnecessary queries
+}
+
 // Get categories first
+// Prepare the main SQL query for categories
 $sql = "SELECT c.* 
         FROM categories c 
         $where_clause 
         ORDER BY c.name ASC 
         LIMIT ?, ?";
-$params[] = $offset;
-$params[] = $limit;
-$types .= 'ii';
+
+// Add pagination parameters (these must be the last parameters)
+$pagination_params = [$offset, $limit];
+$pagination_types = 'ii';
+
+// Create a copy of the initial parameters for the main query
+$query_params = $params;
+$query_types = $types;
+
+// Add pagination parameters to the query parameters
+foreach ($pagination_params as $param) {
+    $query_params[] = $param;
+}
+$query_types .= $pagination_types;
+
+debug_log('Final query parameters', [
+    'sql' => $sql,
+    'params' => $query_params,
+    'types' => $query_types,
+    'where' => $where_clause
+]);
 
 debug_log('Category SQL', $sql);
 debug_log('Category Params', $params);
 
 $stmt = $conn->prepare($sql);
-if (!empty($params)) {
-    $stmt->bind_param($types, ...$params);
+if (!empty($query_params)) {
+    // Bind all parameters including pagination
+    $stmt->bind_param($query_types, ...$query_params);
 }
+
+debug_log('Executing category query', [
+    'param_count' => count($query_params),
+    'type_string' => $query_types
+]);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -188,6 +248,16 @@ debug_log('Categories fetched', $categories);
 debug_log('Category IDs', $category_ids);
 
 // Get all post counts at once if we have categories
+if (!empty($searchTerm)) {
+    if ($total_categories == 0) {
+        $showing_text = "Found 0 categories matching '$searchTerm'";
+    } else {
+        $showing_text = "Showing $total_categories result(s) for search query '$searchTerm'";
+    }
+} else {
+    $showing_text = "Showing $total_categories out of $total_categories categories";
+}
+
 if (!empty($category_ids)) {
     // First, verify post_categories table exists and has data
     $check_table = "SHOW TABLES LIKE 'post_categories'";
@@ -245,14 +315,40 @@ if (!empty($category_ids)) {
 
 debug_log('Final categories with counts', $categories);
 
-// Add a debug variable for JavaScript
+output_stage:
+// Apply additional checks to ensure categories is empty for empty search results
+if (!empty($searchTerm) && $total_categories == 0) {
+    // Force categories to be empty for no search results
+    $categories = []; 
+    
+    // Ensure the JavaScript debug data correctly shows empty categories
+    $category_ids = [];
+    $category_counts = [];
+}
+
+// Make sure the showing_text is set
+if (empty($showing_text)) {
+    if (!empty($searchTerm)) {
+        if ($total_categories == 0) {
+            $showing_text = "Found 0 categories matching '$searchTerm'";
+        } else {
+            $showing_text = "Showing $total_categories result(s) for search query '$searchTerm'";
+        }
+    } else {
+        $showing_text = "Showing " . count($categories) . " of $total_categories categories";
+    }
+}
+
+// Debug data for JavaScript
 $debug_data = [
     'category_ids' => $category_ids,
-    'category_counts' => $category_counts ?? [],
-    'categories' => $categories
+    'category_counts' => $category_counts,
+    'categories' => $categories,
+    'search_term' => $searchTerm,
+    'total_results' => $total_categories,
+    'has_search' => !empty($searchTerm),
+    'empty_results' => (!empty($searchTerm) && $total_categories == 0)
 ];
-
-
 
 // Set page title
 $page_title = 'Manage Categories';
@@ -268,8 +364,29 @@ console.log("Debug data from PHP:", debugData);
 
 // Add debugging to post count display when page loads
 document.addEventListener("DOMContentLoaded", function() {
+    // Log search information if present
+    if (debugData.search_term) {
+        console.log(`Search query: "${debugData.search_term}" - Found ${debugData.total_results} results`);
+        
+        // Add a warning notification if search is active but no results found
+        if (debugData.total_results === 0) {
+            console.warn("No search results found, but categories are still displayed");
+            
+            // Add a highlight to the search box
+            const searchBox = document.getElementById("search");
+            if (searchBox) {
+                searchBox.style.borderColor = "#ffc107";
+            }
+        }
+    }
+    
+    // Get all post count cells
     const postCountCells = document.querySelectorAll(".post-count-cell");
     console.log("Found " + postCountCells.length + " post count cells");
+    
+    if (postCountCells.length === 0 && debugData.search_term) {
+        console.log("No categories displayed due to empty search results");
+    }
     
     // Check each cell for correct data
     postCountCells.forEach(cell => {
@@ -343,7 +460,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 <!-- Filter and Search -->
                 <div class="card mb-4">
                     <div class="card-body">
-                        <form action="" method="GET" class="row g-3">
+                        <form action="/admin/categories.php" method="GET" class="row g-3">
                             <div class="col-md-10">
                                 <label for="search" class="form-label">Search Categories</label>
                                 <input type="text" class="form-control" id="search" name="search" value="<?php echo htmlspecialchars($searchTerm); ?>" placeholder="Search by name, description, or slug...">
@@ -354,6 +471,20 @@ document.addEventListener("DOMContentLoaded", function() {
                                 </button>
                             </div>
                         </form>
+                        <?php if (!empty($searchTerm)): ?>
+                            <div class="alert alert-info mt-3 mb-0">
+                                Searching for: <strong><?php echo htmlspecialchars($searchTerm); ?></strong>
+                                <a href="/admin/categories.php" class="float-end">Clear Search</a>
+                            </div>
+                            
+                            <!-- Debug information (admin only) -->
+                            <div class="mt-2 p-2 bg-light small text-muted">
+                                <strong>Debug:</strong> Search WHERE clause: <code><?php echo htmlspecialchars($where_clause); ?></code><br>
+                                <strong>Parameters:</strong> <code><?php echo htmlspecialchars(implode(', ', $params)); ?></code><br>
+                                <strong>Types:</strong> <code><?php echo htmlspecialchars($types); ?></code><br>
+                                <strong>Total results:</strong> <code><?php echo $total_categories; ?></code>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 
@@ -373,9 +504,26 @@ document.addEventListener("DOMContentLoaded", function() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if (empty($categories)): ?>
+                                    <?php 
+                                    // Check if this is a search with no results
+                                    $is_empty_search = (!empty($searchTerm) && $total_categories == 0);
+                                    
+                                    // Only show categories if either:
+                                    // 1. We're not searching, or
+                                    // 2. We're searching and found results
+                                    if ($is_empty_search || empty($categories)): 
+                                    ?>
                                         <tr>
-                                            <td colspan="6" class="text-center py-4">No categories found</td>
+                                            <td colspan="6" class="text-center py-4">
+                                                <?php if (!empty($searchTerm)): ?>
+                                                    <div class="alert alert-warning mb-0">
+                                                        <i class="fas fa-search me-2"></i>
+                                                        No categories found matching <strong>"<?php echo htmlspecialchars($searchTerm); ?>"</strong>
+                                                    </div>
+                                                <?php else: ?>
+                                                    No categories found
+                                                <?php endif; ?>
+                                            </td>
                                         </tr>
                                     <?php else: ?>
                                         <?php foreach ($categories as $category): ?>
@@ -476,9 +624,18 @@ document.addEventListener("DOMContentLoaded", function() {
                     <?php endif; ?>
                 </div>
                 
+                <!-- Pagination footer -->
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted small">
+                            <?php echo $showing_text; ?>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Summary -->
                 <div class="mt-3 text-muted small">
-                    Showing <?php echo count($categories); ?> of <?php echo $total_categories; ?> categories
+                    <?php echo $showing_text; // Use the same variable we set earlier for consistency ?>
                 </div>
             </div>
         </div>
