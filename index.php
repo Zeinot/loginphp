@@ -79,7 +79,7 @@ if ($categoryName) {
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold">Browse Categories</h2>
-            <a href="/categories.php" class="text-decoration-none">View All <i class="fas fa-arrow-right ms-1"></i></a>
+           
         </div>
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3">
             <?php foreach($categories as $category): ?>
