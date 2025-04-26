@@ -132,45 +132,72 @@ if ($result && $result->num_rows > 0) {
                             <div class="card-body p-0">
                                 <div class="table-responsive">
                                     <table class="table table-hover mb-0">
-                                        <thead>
+                                        <thead class="table-light">
                                             <tr>
                                                 <th>Title</th>
                                                 <th>Author</th>
                                                 <th>Date</th>
                                                 <th>Status</th>
-                                                <th>Actions</th>
+                                                <th>Views</th>
+                                                <th class="text-end">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php if (empty($recentPosts)): ?>
                                                 <tr>
-                                                    <td colspan="5" class="text-center">No posts found</td>
+                                                    <td colspan="6" class="text-center py-4">No posts found</td>
                                                 </tr>
                                             <?php else: ?>
                                                 <?php foreach ($recentPosts as $post): ?>
                                                     <tr>
                                                         <td>
-                                                            <a href="/posts/view.php?id=<?php echo $post['id']; ?>" class="text-decoration-none">
-                                                                <?php echo (strlen($post['title']) > 30) ? substr($post['title'], 0, 30) . '...' : $post['title']; ?>
-                                                            </a>
+                                                            <div class="d-flex align-items-center">
+                                                                <?php 
+                                                                // Get primary image
+                                                                $img_sql = "SELECT image_path FROM images WHERE post_id = ? AND is_primary = 1 LIMIT 1";
+                                                                $img_stmt = $conn->prepare($img_sql);
+                                                                $img_stmt->bind_param('i', $post['id']);
+                                                                $img_stmt->execute();
+                                                                $img_result = $img_stmt->get_result();
+                                                                $img = $img_result->fetch_assoc();
+                                                                ?>
+                                                                <div class="me-2" style="width: 40px; height: 40px; overflow: hidden;">
+                                                                    <?php if ($img): ?>
+                                                                        <img src="/<?php echo $img['image_path']; ?>" alt="Thumbnail" class="img-thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
+                                                                    <?php else: ?>
+                                                                        <div class="bg-light d-flex align-items-center justify-content-center" style="width: 100%; height: 100%;">
+                                                                            <i class="fas fa-image text-muted"></i>
+                                                                        </div>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                                <div>
+                                                                    <a href="/posts/view.php?id=<?php echo $post['id']; ?>" class="text-decoration-none fw-medium">
+                                                                        <?php echo htmlspecialchars($post['title']); ?>
+                                                                    </a>
+                                                                    <div class="small text-muted text-truncate" style="max-width: 200px;">
+                                                                        <?php echo htmlspecialchars(substr($post['description'], 0, 40)); ?><?php if (strlen($post['description']) > 40) echo '...'; ?>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         </td>
-                                                        <td><?php echo $post['username']; ?></td>
-                                                        <td><?php echo date('M d, Y', strtotime($post['created_at'])); ?></td>
+                                                        <td><?php echo htmlspecialchars($post['username']); ?></td>
+                                                        <td><?php echo formatDate($post['created_at']); ?></td>
                                                         <td>
-                                                            <span class="badge bg-<?php echo ($post['status'] === 'active') ? 'success' : (($post['status'] === 'pending') ? 'warning' : 'danger'); ?>">
+                                                            <span class="badge bg-<?php echo ($post['status'] === 'active') ? 'success' : (($post['status'] === 'pending') ? 'warning' : (($post['status'] === 'expired') ? 'secondary' : 'danger')); ?>">
                                                                 <?php echo ucfirst($post['status']); ?>
                                                             </span>
                                                         </td>
+                                                        <td><?php echo $post['views']; ?></td>
                                                         <td>
-                                                            <div class="btn-group">
+                                                            <div class="btn-group float-end">
                                                                 <a href="/posts/view.php?id=<?php echo $post['id']; ?>" class="btn btn-sm btn-outline-primary">
                                                                     <i class="fas fa-eye"></i>
                                                                 </a>
-                                                                <a href="/admin/posts.php?action=edit&id=<?php echo $post['id']; ?>" class="btn btn-sm btn-outline-warning">
+                                                                <a href="/posts/edit.php?id=<?php echo $post['id']; ?>" class="btn btn-sm btn-outline-warning">
                                                                     <i class="fas fa-edit"></i>
                                                                 </a>
-                                                                <a href="/admin/posts.php?action=delete&id=<?php echo $post['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this post?')">
-                                                                    <i class="fas fa-trash"></i>
+                                                                <a href="/admin/posts.php?action=status&id=<?php echo $post['id']; ?>&status=<?php echo $post['status'] === 'active' ? 'pending' : 'active'; ?>" class="btn btn-sm btn-outline-<?php echo $post['status'] === 'active' ? 'secondary' : 'success'; ?>">
+                                                                    <i class="fas <?php echo $post['status'] === 'active' ? 'fa-pause' : 'fa-play'; ?>"></i>
                                                                 </a>
                                                             </div>
                                                         </td>
