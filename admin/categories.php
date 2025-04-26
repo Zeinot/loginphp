@@ -161,13 +161,13 @@ if (!empty($searchTerm)) {
         $category_ids = [];
         
         // Add a notice about the search results
-        $success = "Search completed successfully.";
-        $error = "No categories found matching '$searchTerm'.";
+        // $success = "Search completed successfully.";
+        // $error = "No categories found matching '$searchTerm'.";
         
         goto output_stage; // Skip to the output stage to avoid unnecessary queries
     } else {
         // When searching with results, add a success message
-        $success = "Search completed successfully.";
+        // $success = "Search completed successfully.";
     }
 }
 
