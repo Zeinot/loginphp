@@ -84,7 +84,7 @@ if ($categoryName) {
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3">
             <?php foreach($categories as $category): ?>
                 <div class="col">
-                    <a href="/index.php?category=<?php echo $category['id']; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>" class="text-decoration-none">
+                    <a href="/index.php?category=<?php echo $category['id']; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>" class="text-decoration-none category-browse-link">
                         <div class="card h-100 text-center category-card">
                             <div class="card-body">
                                 <?php
@@ -131,6 +131,28 @@ if ($categoryName) {
             <?php endforeach; ?>
         </div>
     </div>
+
+    <!-- JavaScript to add scroll position to category browse links -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const categoryLinks = document.querySelectorAll('.category-browse-link');
+        
+        categoryLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Get the current href and create a URL object
+                const currentUrl = new URL(this.href, window.location.origin);
+                
+                // Add current scroll position
+                currentUrl.searchParams.set('scrollPos', window.pageYOffset || document.documentElement.scrollTop);
+                
+                // Navigate to the modified URL
+                window.location.href = currentUrl.toString();
+            });
+        });
+    });
+    </script>
 </section>
 
 <!-- Listings Section -->

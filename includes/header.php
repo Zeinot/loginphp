@@ -37,7 +37,7 @@ require_once $docRoot . '/includes/functions.php';
                         <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-th-list me-1"></i> Categories
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu category-dropdown">
                             <?php
                             $nav_categories = getCategories();
                             foreach ($nav_categories as $category) {
@@ -45,6 +45,32 @@ require_once $docRoot . '/includes/functions.php';
                             }
                             ?>
                         </ul>
+                        
+                        <script>
+                        // Add scroll position to category links
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const categoryLinks = document.querySelectorAll('.category-dropdown .dropdown-item');
+                            
+                            categoryLinks.forEach(function(link) {
+                                link.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    const currentUrl = new URL(this.href);
+                                    
+                                    // Add current scroll position
+                                    currentUrl.searchParams.set('scrollPos', window.pageYOffset || document.documentElement.scrollTop);
+                                    
+                                    // Preserve existing search parameter if present
+                                    const currentSearch = new URLSearchParams(window.location.search).get('search');
+                                    if (currentSearch) {
+                                        currentUrl.searchParams.set('search', currentSearch);
+                                    }
+                                    
+                                    // Navigate to the modified URL
+                                    window.location.href = currentUrl.toString();
+                                });
+                            });
+                        });
+                        </script>
                     </li>
                     <?php if (isAdmin()): ?>
                     <li class="nav-item">
