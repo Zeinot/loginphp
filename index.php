@@ -84,7 +84,7 @@ if ($categoryName) {
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3">
             <?php foreach($categories as $category): ?>
                 <div class="col">
-                    <a href="/index.php?category=<?php echo $category['id']; ?>" class="text-decoration-none">
+                    <a href="/index.php?category=<?php echo $category['id']; ?><?php echo !empty($search) ? '&search=' . urlencode($search) : ''; ?>" class="text-decoration-none">
                         <div class="card h-100 text-center category-card">
                             <div class="card-body">
                                 <?php
@@ -134,7 +134,7 @@ if ($categoryName) {
 </section>
 
 <!-- Listings Section -->
-<section class="mb-5">
+<section id="listings" class="mb-5">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold">
@@ -401,5 +401,34 @@ if ($categoryName) {
         </div>
     </div>
 </section>
+
+<!-- Script to restore scroll position -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Try to restore scroll position if available
+    const scrollPos = new URLSearchParams(window.location.search).get('scrollPos');
+    
+    if (scrollPos && parseInt(scrollPos) > 0) {
+        // Slight delay to ensure page is fully loaded
+        setTimeout(function() {
+            window.scrollTo(0, parseInt(scrollPos));
+        }, 100);
+    } else if (window.location.hash) {
+        // If there's a hash anchor, scroll to it
+        const element = document.querySelector(window.location.hash);
+        if (element) {
+            element.scrollIntoView();
+        }
+    } else if (new URLSearchParams(window.location.search).get('category') === '3') {
+        // Category ID 3 is Jobs, scroll to listings section
+        const jobsSection = document.getElementById('listings');
+        if (jobsSection) {
+            setTimeout(function() {
+                jobsSection.scrollIntoView();
+            }, 100);
+        }
+    }
+});
+</script>
 
 <?php include 'includes/footer.php'; ?>

@@ -55,12 +55,30 @@ require_once $docRoot . '/includes/functions.php';
                 
                 <form class="d-flex mx-auto search-form" action="/index.php" method="GET">
                     <div class="input-group">
-                        <input type="text" class="form-control" name="search" placeholder="Search listings..." aria-label="Search">
+                        <input type="text" class="form-control" name="search" value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>" placeholder="Search listings..." aria-label="Search">
+                        <?php if(isset($_GET['category'])): ?>
+                        <input type="hidden" name="category" value="<?php echo htmlspecialchars($_GET['category']); ?>">
+                        <?php endif; ?>
+                        <input type="hidden" name="scrollPos" id="scrollPosField" value="0">
                         <button class="btn btn-light" type="submit">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
                 </form>
+                
+                <script>
+                // Update scroll position before form submission
+                document.addEventListener('DOMContentLoaded', function() {
+                    const searchForm = document.querySelector('.search-form');
+                    const scrollPosField = document.getElementById('scrollPosField');
+                    
+                    if (searchForm && scrollPosField) {
+                        searchForm.addEventListener('submit', function() {
+                            scrollPosField.value = window.pageYOffset || document.documentElement.scrollTop;
+                        });
+                    }
+                });
+                </script>
                 
                 <ul class="navbar-nav ms-auto">
                     <?php if (isLoggedIn()): ?>
