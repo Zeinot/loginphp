@@ -10,9 +10,7 @@ if (!isLoggedIn() || !isAdmin()) {
 $searchTerm = isset($_GET['search']) ? sanitize($_GET['search']) : '';
 $showing_text = ''; // Initialize showing_text to prevent undefined variable warnings
 
-// Initialize debug data array
-$debug_data = []; 
-debug_log('Search request parameters', $_GET);
+// Initialize search
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $limit = 10; // Items per page
 $offset = ($page - 1) * $limit;
@@ -136,8 +134,6 @@ if (!empty($searchTerm)) {
     $params = [$searchParam, $searchParam, $searchParam];
     $types = 'sss';
     
-    // Log search query for debugging
-    debug_log('Search activated', ['term' => $searchTerm, 'param' => $searchParam]);
 }
 
 // Count total categories for pagination
@@ -151,27 +147,11 @@ $result_count = $stmt_count->get_result();
 $total_categories = $result_count->fetch_assoc()['total'];
 $total_pages = ceil($total_categories / $limit);
 
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
-// Debug function
-function debug_log($message, $data = null) {
-    error_log(print_r(['message' => $message, 'data' => $data], true));
-    
-    global $debug_data;
-    if (!isset($debug_data)) {
-        $debug_data = [];
-    }
-    
-    $debug_data[] = [
-        'message' => $message,
-        'data' => $data,
-        'time' => date('H:i:s')
-    ];
-}
 
-debug_log('Starting category processing');
+
+
+
 
 // First get all category IDs for later use
 $categories_with_counts = [];
@@ -183,7 +163,7 @@ if (!empty($searchTerm) && $total_categories == 0) {
     $categories = [];
     $category_counts = [];
     $category_ids = [];
-    debug_log('Search found no results, skipping further queries');
+    
     
     // Add a notice about the search results
     $success = "Search completed successfully.";
@@ -214,15 +194,8 @@ foreach ($pagination_params as $param) {
 }
 $query_types .= $pagination_types;
 
-debug_log('Final query parameters', [
-    'sql' => $sql,
-    'params' => $query_params,
-    'types' => $query_types,
-    'where' => $where_clause
-]);
 
-debug_log('Category SQL', $sql);
-debug_log('Category Params', $params);
+
 
 $stmt = $conn->prepare($sql);
 if (!empty($query_params)) {
@@ -230,10 +203,7 @@ if (!empty($query_params)) {
     $stmt->bind_param($query_types, ...$query_params);
 }
 
-debug_log('Executing category query', [
-    'param_count' => count($query_params),
-    'type_string' => $query_types
-]);
+
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -244,8 +214,8 @@ while ($row = $result->fetch_assoc()) {
     $category_ids[] = $row['id'];
 }
 
-debug_log('Categories fetched', $categories);
-debug_log('Category IDs', $category_ids);
+
+
 
 // Get all post counts at once if we have categories
 if (!empty($searchTerm)) {
@@ -262,33 +232,19 @@ if (!empty($category_ids)) {
     // First, verify post_categories table exists and has data
     $check_table = "SHOW TABLES LIKE 'post_categories'";
     $table_result = $conn->query($check_table);
-    debug_log('Table check result', ['exists' => ($table_result->num_rows > 0)]);
     
     if ($table_result->num_rows > 0) {
         // Check for any entries in post_categories
         $check_entries = "SELECT COUNT(*) as total FROM post_categories";
         $entries_result = $conn->query($check_entries);
-        $entries_count = $entries_result->fetch_assoc()['total'];
-        debug_log('Total post_categories entries', $entries_count);
-        
-        // Direct query for debugging each category
-        foreach ($category_ids as $cat_id) {
-            $debug_query = "SELECT COUNT(*) as count FROM post_categories WHERE category_id = $cat_id";
-            $debug_result = $conn->query($debug_query);
-            $debug_count = $debug_result->fetch_assoc()['count'];
-            debug_log("Category ID $cat_id has $debug_count posts");
-        }
-        
+        $entries_count = $entries_result->fetch_assoc()['total'];      
         // Get counts for all categories directly with a single query
         $counts_query = "SELECT category_id, COUNT(*) as post_count 
                         FROM post_categories 
                         WHERE category_id IN (" . implode(',', $category_ids) . ") 
                         GROUP BY category_id";
         
-        debug_log('Counts query', $counts_query);
-        
         $counts_result = $conn->query($counts_query);
-        debug_log('Counts result', ['success' => ($counts_result !== false), 'rows' => ($counts_result ? $counts_result->num_rows : 0)]);
         
         $category_counts = [];
         
@@ -299,21 +255,14 @@ if (!empty($category_ids)) {
             }
         }
         
-        debug_log('Category counts array', $category_counts);
-        
         // Merge the counts with the categories
         foreach ($categories as &$category) {
             $category['post_count'] = isset($category_counts[$category['id']]) ? $category_counts[$category['id']] : 0;
-            debug_log("Setting post_count for category {$category['name']} (ID: {$category['id']}) to {$category['post_count']}");
         }
     } else {
-        debug_log('ERROR: post_categories table does not exist');
+        // post_categories table does not exist
     }
-} else {
-    debug_log('No category IDs to process');
 }
-
-debug_log('Final categories with counts', $categories);
 
 output_stage:
 // Apply additional checks to ensure categories is empty for empty search results
@@ -339,78 +288,13 @@ if (empty($showing_text)) {
     }
 }
 
-// Debug data for JavaScript
-$debug_data = [
-    'category_ids' => $category_ids,
-    'category_counts' => $category_counts,
-    'categories' => $categories,
-    'search_term' => $searchTerm,
-    'total_results' => $total_categories,
-    'has_search' => !empty($searchTerm),
-    'empty_results' => (!empty($searchTerm) && $total_categories == 0)
-];
+
 
 // Set page title
 $page_title = 'Manage Categories';
 include '../includes/header.php';
 
-// Debug Information (Hidden)
-echo '<div id="php-debug-data" style="display: none;" data-debug="' . htmlspecialchars(json_encode($debug_data)) . '"></div>';
 
-echo '<script>
-// Client-side debugging
-const debugData = JSON.parse(document.getElementById("php-debug-data").dataset.debug);
-console.log("Debug data from PHP:", debugData);
-
-// Add debugging to post count display when page loads
-document.addEventListener("DOMContentLoaded", function() {
-    // Log search information if present
-    if (debugData.search_term) {
-        console.log(`Search query: "${debugData.search_term}" - Found ${debugData.total_results} results`);
-        
-        // Add a warning notification if search is active but no results found
-        if (debugData.total_results === 0) {
-            console.warn("No search results found, but categories are still displayed");
-            
-            // Add a highlight to the search box
-            const searchBox = document.getElementById("search");
-            if (searchBox) {
-                searchBox.style.borderColor = "#ffc107";
-            }
-        }
-    }
-    
-    // Get all post count cells
-    const postCountCells = document.querySelectorAll(".post-count-cell");
-    console.log("Found " + postCountCells.length + " post count cells");
-    
-    if (postCountCells.length === 0 && debugData.search_term) {
-        console.log("No categories displayed due to empty search results");
-    }
-    
-    // Check each cell for correct data
-    postCountCells.forEach(cell => {
-        const categoryId = cell.dataset.categoryId;
-        const displayedCount = cell.textContent.trim();
-        const expectedCount = debugData.category_counts[categoryId] || 0;
-        
-        console.log(`Category ID ${categoryId}: Displayed=${displayedCount}, Expected=${expectedCount}`);
-        
-        // Highlight cells with incorrect counts for visibility
-        if (displayedCount != expectedCount) {
-            cell.style.backgroundColor = "#ffcccc";
-            cell.title = `Expected: ${expectedCount}`;
-            console.error(`Mismatch for category ID ${categoryId}: Displayed=${displayedCount}, Expected=${expectedCount}`);
-        }
-        
-        // Highlight non-zero counts with green background
-        if (displayedCount > 0) {
-            cell.style.backgroundColor = "#ccffcc";
-            cell.style.fontWeight = "bold";
-        }
-    });
-});
-</script>';
 ?>
 
 <div class="container-fluid py-4">
@@ -477,13 +361,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                 <a href="/admin/categories.php" class="float-end">Clear Search</a>
                             </div>
                             
-                            <!-- Debug information (admin only) -->
-                            <div class="mt-2 p-2 bg-light small text-muted">
-                                <strong>Debug:</strong> Search WHERE clause: <code><?php echo htmlspecialchars($where_clause); ?></code><br>
-                                <strong>Parameters:</strong> <code><?php echo htmlspecialchars(implode(', ', $params)); ?></code><br>
-                                <strong>Types:</strong> <code><?php echo htmlspecialchars($types); ?></code><br>
-                                <strong>Total results:</strong> <code><?php echo $total_categories; ?></code>
-                            </div>
+
                         <?php endif; ?>
                     </div>
                 </div>
@@ -633,10 +511,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     </div>
                 </div>
                 
-                <!-- Summary -->
-                <div class="mt-3 text-muted small">
-                    <?php echo $showing_text; // Use the same variable we set earlier for consistency ?>
-                </div>
+
             </div>
         </div>
     </div>
