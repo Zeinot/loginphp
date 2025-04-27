@@ -36,6 +36,7 @@ if ($categoryName) {
 <?php include 'includes/header.php'; ?>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 <!-- Hero Section -->
 <div class="hero-section mb-5">
     <div class="container">
@@ -64,6 +65,8 @@ if ($categoryName) {
            
         </div>
 =======
+=======
+>>>>>>> parent of f98d515 (sssaaavvve)
 <!-- Hero Section - Enhanced with better visuals and stronger value proposition -->
 <section class="hero mb-5 py-5" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%); color: white; border-radius: 0 0 15px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
     <div class="container py-5">
@@ -110,6 +113,9 @@ if ($categoryName) {
             <h2 class="fw-bold">Browse Categories</h2>
            
         </div>
+<<<<<<< HEAD
+>>>>>>> parent of f98d515 (sssaaavvve)
+=======
 >>>>>>> parent of f98d515 (sssaaavvve)
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-6 g-3">
             <?php foreach($categories as $category): ?>
