@@ -35,44 +35,25 @@ if ($categoryName) {
 
 <?php include 'includes/header.php'; ?>
 
-<!-- Hero Section - Enhanced with better visuals and stronger value proposition -->
-<section class="hero mb-5 py-5" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%); color: white; border-radius: 0 0 15px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-    <div class="container py-5">
+<!-- Hero Section -->
+<div class="hero-section mb-5">
+    <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-7 text-center text-lg-start">
-                <h1 class="display-3 fw-bold mb-3">Find Everything You Need Locally</h1>
-                <p class="lead fs-4 mb-4 opacity-90">The modern marketplace to buy, sell, and connect with your community. Post listings for free and find everything you need nearby.</p>
-                <div class="d-flex flex-column flex-sm-row gap-3">
-                    <a href="/posts/create.php" class="btn btn-light btn-lg fw-bold" style="padding: 12px 24px;">
-                        <i class="fas fa-plus-circle me-2"></i> Post an Ad
-                    </a>
-                    <a href="/how-it-works.php" class="btn btn-outline-light btn-lg" style="padding: 12px 24px;">
-                        <i class="fas fa-info-circle me-2"></i> How It Works
-                    </a>
-                </div>
-                <div class="mt-4">
-                    <div class="d-flex justify-content-center justify-content-lg-start gap-4">
-                        <div>
-                            <div class="text-warning fs-5"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-                            <p class="mb-0 small">4.8/5 Rating</p>
-                        </div>
-                        <div>
-                            <div class="text-white fs-5"><i class="fas fa-users"></i> 10,000+</div>
-                            <p class="mb-0 small">Active Users</p>
-                        </div>
-                        <div>
-                            <div class="text-white fs-5"><i class="fas fa-check-circle"></i> 100%</div>
-                            <p class="mb-0 small">Secure</p>
-                        </div>
-                    </div>
+            <div class="col-lg-7 hero-content">
+                <h1 class="display-4 fw-bold">Welcome to ListItAll</h1>
+                <p class="lead">Your modern community marketplace for everything. Buy, sell, or trade locally with ease.</p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start hero-buttons">
+                    <a href="/posts/create.php" class="btn btn-hero-primary me-md-2" type="button"><i class="fas fa-plus-circle me-2"></i>Post an Ad</a>
+                    <a href="/how-it-works.php" class="btn btn-hero-secondary" type="button"><i class="fas fa-info-circle me-2"></i>How It Works</a>
                 </div>
             </div>
-            <div class="col-lg-5 d-none d-lg-block">
-                <img src="/assets/images/hero-illustration.svg" alt="ListItAll Marketplace" class="img-fluid mt-4 mt-lg-0" style="max-height: 400px;">
+            <div class="col-lg-5 mt-4 mt-lg-0 hero-illustration">
+                <!-- Consider replacing with a more modern/relevant illustration -->
+                <img src="/assets/images/hero-illustration.svg" class="img-fluid" alt="Marketplace Illustration">
             </div>
         </div>
     </div>
-</section>
+</div>
 
 <!-- Categories Section -->
 <section class="mb-5">
